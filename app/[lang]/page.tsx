@@ -3,7 +3,8 @@
 export default async function ProfilePage({ params }: { params: { lang: string } }) {
   // Here you will fetch profile data from Strapi later
 
-  const isEnglish = params.lang === 'en';
+  const { lang } = await params;
+  const isEnglish = lang === 'en';
 
   return (
     <main className="container mx-auto p-4">

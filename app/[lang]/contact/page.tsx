@@ -1,7 +1,8 @@
 // app/[lang]/contact/page.tsx
 
 export default async function ContactPage({ params }: { params: { lang: string } }) {
-  const isEnglish = params.lang === 'en';
+  const { lang } = await params;
+  const isEnglish = lang === 'en';
 
   return (
     <main className="container mx-auto p-4">
