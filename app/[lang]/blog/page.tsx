@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import type { NextPage } from 'next';
 import ReactMarkdown from 'react-markdown'; // Tambahkan ini
 import React from 'react'; // Pastikan React diimpor
+import Link from 'next/link';
 
 type Post = {
   id: number;
@@ -75,7 +76,11 @@ const BlogPage: NextPage<{ params: { lang: string } }> = ({ params }) => {
       <h1 className="text-4xl font-bold mb-8">{lang === 'en' ? 'Blog Posts' : 'Artikel Blog'}</h1>
       <div className="space-y-6">
         {posts.map((post) => (
-          <div key={post.id} className="bg-gray-800 p-6 rounded-lg shadow-lg flex items-center">
+          <Link
+            href={`/${lang}/blog/${post.slug}`}
+            key={post.id}
+            className="bg-gray-800 p-6 rounded-lg shadow-lg flex items-center"
+          >
             {post.coverImage && post.coverImage[0] && (
               <div className="w-48 h-32 relative mr-6 flex-shrink-0">
                 <Image
@@ -102,7 +107,7 @@ const BlogPage: NextPage<{ params: { lang: string } }> = ({ params }) => {
                 <ReactMarkdown>{post.content}</ReactMarkdown>
               </div>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
       {loading && (
