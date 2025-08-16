@@ -17,6 +17,32 @@ async function getBlogPost(lang: string, slug: string) {
   return data.data[0];
 }
 
+export async function generateMetadata({ params }: { params: { lang: string; slug: string } }) {
+  const { lang, slug } = await params;
+  const post = await getBlogPost(lang, slug);
+
+  if (!post) {
+    return {};
+  }
+
+  const seoTitle = post.title || 'Blog Post';
+  const seoDescription = post.content.substring(0, 150) + '...' || 'Read this interesting blog post.';
+  const seoImage =
+    post.coverImage && post.coverImage[0]
+      ? `${process.env.NEXT_PUBLIC_STRAPI_BASE_URL}${post.coverImage[0].url}`
+      : null;
+
+  return {
+    title: seoTitle,
+    description: seoDescription,
+    openGraph: {
+      title: seoTitle,
+      description: seoDescription,
+      images: seoImage ? [{ url: seoImage }] : [],
+    },
+  };
+}
+
 export default async function BlogPostPage({ params }: { params: { lang: string; slug: string } }) {
   const { lang, slug } = await params;
   const post = await getBlogPost(lang, slug);
