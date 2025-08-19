@@ -1,9 +1,11 @@
 import ReactMarkdown from 'react-markdown';
 import Link from 'next/link';
-import Pagination from '../../components/Pagination'; // Impor Pagination
+import Pagination from '../../components/Pagination';
+import SearchInput from '../../components/SearchInput'; // Impor SearchInput
 
-async function getBlogPosts(lang: string, page: number = 1) {
-  const url = `${process.env.NEXT_PUBLIC_STRAPI_API_URL}/blog-posts?locale=${lang}&populate=*&sort=publishedAt:desc&pagination[page]=${page}&pagination[pageSize]=5`;
+async function getBlogPosts(lang: string, page: number = 1, searchTerm: string = '') {
+  const searchFilter = searchTerm ? `&filters[title][$containsi]=${searchTerm}` : '';
+  const url = `${process.env.NEXT_PUBLIC_STRAPI_API_URL}/blog-posts?locale=${lang}&populate=*&sort=publishedAt:desc&pagination[page]=${page}&pagination[pageSize]=5${searchFilter}`;
   const res = await fetch(url, { cache: 'no-store' });
   if (!res.ok) {
     throw new Error('Failed to fetch blog posts');
@@ -17,18 +19,21 @@ export default async function BlogPage({
   searchParams,
 }: {
   params: { lang: string };
-  searchParams: { page?: string };
+  searchParams: { page?: string; q?: string };
 }) {
   const { lang } = await params;
   const page = searchParams.page ? parseInt(searchParams.page) : 1;
+  const searchTerm = searchParams.q || '';
 
-  const postsData = await getBlogPosts(lang, page);
+  const postsData = await getBlogPosts(lang, page, searchTerm);
   const posts = postsData.data;
   const pagination = postsData.meta.pagination;
 
   return (
     <main className="container mx-auto p-4 md:p-8">
-      <h1 className="text-3xl font-bold mb-8">{lang === 'en' ? 'Blog Posts' : 'Artikel Blog'}</h1>
+      <h1 className="text-3xl font-bold mb-8 text-center">{lang === 'en' ? 'Blog Posts' : 'Artikel Blog'}</h1>
+
+      <SearchInput />
 
       <div className="space-y-8">
         {posts.length > 0 ? (
@@ -60,7 +65,6 @@ export default async function BlogPage({
         )}
       </div>
 
-      {/* Tampilkan Pagination jika ada lebih dari 1 halaman */}
       {pagination.pageCount > 1 && <Pagination page={pagination.page} pageCount={pagination.pageCount} />}
     </main>
   );
