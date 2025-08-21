@@ -3,7 +3,11 @@
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
-export default function SearchInput() {
+type SearchInputProps = {
+  lang: string; // Tambahkan properti lang
+};
+
+export default function SearchInput({ lang }: SearchInputProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -28,6 +32,8 @@ export default function SearchInput() {
     setSearchTerm(currentSearchTerm);
   }, [currentSearchTerm]);
 
+  const placeholderText = lang === 'en' ? 'Search articles...' : 'Cari artikel...';
+
   return (
     <form onSubmit={handleSearch} className="flex-1 max-w-lg mx-auto mb-8">
       <div className="relative">
@@ -35,7 +41,7 @@ export default function SearchInput() {
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Cari artikel..."
+          placeholder={placeholderText}
           className="w-full pl-10 pr-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
         />
         <svg

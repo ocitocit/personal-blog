@@ -2,7 +2,8 @@ import Image from 'next/image';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import React from 'react';
-import { redirect } from 'next/navigation'; // Impor fungsi redirect
+import { redirect } from 'next/navigation';
+import Link from 'next/link'; // Impor Link
 import CommentForm from '@/app/components/CommentForm';
 
 // Fungsi untuk mengambil satu postingan blog
@@ -50,13 +51,31 @@ export default async function BlogPostPage({ params }: { params: { lang: string;
   const { lang, slug } = await params;
   const post = await getBlogPost(lang, slug);
 
-  // LOGIKA PERBAIKAN: Jika postingan tidak ditemukan, arahkan ke halaman blog
   if (!post) {
     redirect(`/${lang}/blog`);
   }
 
   return (
     <main className="container mx-auto p-4 md:p-8">
+      {/* Tambahkan tombol kembali di sini */}
+      <div className="mb-8">
+        <Link href={`/${lang}/blog`}>
+          <button className="flex items-center text-blue-400 hover:text-blue-500 transition-colors">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-5 h-5 mr-2"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+            </svg>
+            Kembali ke Blog
+          </button>
+        </Link>
+      </div>
+
       {post.coverImage && post.coverImage[0] && (
         <div className="relative w-full h-96 mb-8 rounded-lg overflow-hidden shadow-lg">
           <Image
@@ -81,7 +100,6 @@ export default async function BlogPostPage({ params }: { params: { lang: string;
         <ReactMarkdown rehypePlugins={[rehypeRaw]}>{post.content}</ReactMarkdown>
       </div>
 
-      {/* Tambahkan komponen formulir komentar di sini */}
       <CommentForm postId={post.id} />
     </main>
   );
