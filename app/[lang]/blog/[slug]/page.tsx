@@ -4,7 +4,6 @@ import rehypeRaw from 'rehype-raw';
 import React from 'react';
 import { redirect } from 'next/navigation';
 import Link from 'next/link'; // Impor Link
-import CommentForm from '@/app/components/CommentForm';
 
 // Fungsi untuk mengambil satu postingan blog
 async function getBlogPost(lang: string, slug: string) {
@@ -99,8 +98,6 @@ export default async function BlogPostPage({ params }: { params: { lang: string;
       <div className="prose prose-invert max-w-none mx-auto p-4 md:p-8 bg-gray-800 rounded-lg shadow-xl">
         <ReactMarkdown rehypePlugins={[rehypeRaw]}>{post.content}</ReactMarkdown>
       </div>
-
-      <CommentForm postId={post.id} />
     </main>
   );
 }

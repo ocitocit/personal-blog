@@ -8,11 +8,23 @@ async function getBlogPosts(lang: string, page: number = 1, searchTerm: string =
   const searchFilter = searchTerm ? `&filters[title][$containsi]=${searchTerm}` : '';
   const url = `${process.env.NEXT_PUBLIC_STRAPI_API_URL}/blog-posts?locale=${lang}&populate=*&sort=publishedAt:desc&pagination[page]=${page}&pagination[pageSize]=5${searchFilter}`;
   const res = await fetch(url, { cache: 'no-store' });
-  if (!res.ok) {
-    throw new Error('Failed to fetch blog posts');
+
+  try {
+    const res = await fetch(url, { cache: 'no-store' });
+
+    // Kesalahan "Failed to fetch" terjadi di sini jika res.ok adalah false.
+    // Ini berarti server Strapi tidak memberikan respons yang berhasil (mis. 200).
+    if (!res.ok) {
+      console.error(`Failed to fetch blog posts: ${res.status} ${res.statusText}`);
+      return { data: [], meta: { pagination: { page: 1, pageCount: 1, total: 0 } } };
+    }
+
+    const data = await res.json();
+    return data;
+  } catch (error) {
+    console.error('Failed to fetch blog posts:', error);
+    return { data: [], meta: { pagination: { page: 1, pageCount: 1, total: 0 } } };
   }
-  const data = await res.json();
-  return data;
 }
 
 export default async function BlogPage({
@@ -24,9 +36,10 @@ export default async function BlogPage({
 }) {
   const { lang } = await params;
 
-  // Solusi: Akses properti searchParams dengan lebih aman menggunakan optional chaining.
-  const page = searchParams?.page ? parseInt(searchParams.page) : 1;
-  const searchTerm = searchParams?.q || '';
+  const awaitedSearchParams = await searchParams;
+  const pageString = awaitedSearchParams?.page || '1';
+  const searchTerm = awaitedSearchParams?.q || '';
+  const page = parseInt(pageString, 10);
 
   const postsData = await getBlogPosts(lang, page, searchTerm);
   const posts = postsData.data;
@@ -42,7 +55,7 @@ export default async function BlogPage({
         {posts.length > 0 ? (
           posts.map((post: any) => (
             <Link href={`/${lang}/blog/${post.slug}`} key={post.id}>
-              <div className="bg-gray-800 p-6 rounded-lg shadow-lg flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-6 transition-transform transform hover:scale-[1.01]">
+              <div className="bg-gray-800 p-6 rounded-lg shadow-lg flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-6 transition-transform transform hover:scale-[1.01] mb-6">
                 {post.coverImage && post.coverImage[0] && (
                   <div className="relative w-full md:w-64 h-48 md:h-32 flex-shrink-0 rounded-lg overflow-hidden">
                     <Image
